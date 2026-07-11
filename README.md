@@ -15,6 +15,14 @@ PawPal+ is built around four classes:
 - **`Owner`** — manages multiple pets and can pull every task across all of them.
 - **`Scheduler`** — the "brain" of the app; sorts tasks, filters them, detects conflicts, and handles marking tasks complete (including generating recurring tasks).
 
+## Features
+
+- **Multi-pet task tracking** — manage tasks across any number of pets under one owner
+- **Sorting by time** — view the full schedule in chronological order
+- **Filtering** — narrow tasks down by pet or by completion status
+- **Conflict warnings** — get flagged when two tasks land on the same date and time
+- **Daily/weekly recurrence** — completing a recurring task automatically schedules its next occurrence
+
 ## Getting started
 
 ### Setup
