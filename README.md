@@ -4,91 +4,106 @@ You are building **PawPal+**, a Streamlit app that helps a pet owner plan care t
 
 ## Scenario
 
-A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
+A busy pet owner needs help staying consistent with pet care. This app tracks tasks (walks, feeding, meds, appointments) across multiple pets, detects scheduling conflicts, and automatically schedules the next occurrence of recurring tasks.
 
-- Track pet care tasks (walks, feeding, meds, enrichment, grooming, etc.)
-- Consider constraints (time available, priority, owner preferences)
-- Produce a daily plan and explain why it chose that plan
+## System Overview
 
-Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
+PawPal+ is built around four classes:
 
-## What you will build
-
-Your final app should:
-
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
+- **`Task`** — a single pet-care activity with a description, due time/date, frequency (once/daily/weekly), and completion status.
+- **`Pet`** — holds identifying info (name, species) and its own list of tasks.
+- **`Owner`** — manages multiple pets and can pull every task across all of them.
+- **`Scheduler`** — the "brain" of the app; sorts tasks, filters them, detects conflicts, and handles marking tasks complete (including generating recurring tasks).
 
 ## Getting started
 
 ### Setup
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Suggested workflow
+### Running the CLI demo
 
-1. Read the scenario carefully and identify requirements and edge cases.
-2. Draft a UML diagram (classes, attributes, methods, relationships).
-3. Convert UML into Python class stubs (no logic yet).
-4. Implement scheduling logic in small increments.
-5. Add tests to verify key behaviors.
-6. Connect your logic to the Streamlit UI in `app.py`.
-7. Refine UML so it matches what you actually built.
+```bash
+python3 main.py
+```
+
+### Running the Streamlit app
+
+```bash
+streamlit run app.py
+```
 
 ## 🖥️ Sample Output
 
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
-
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+Today's Schedule (2026-07-12)
+----------------------------------------
+[08:00] Buddy: Morning walk (Pending)
+[08:00] Whiskers: Feed breakfast (Pending)
+[14:30] Whiskers: Vet appointment (Pending)
+[18:00] Buddy: Evening walk (Pending)
+
+Buddy's incomplete tasks:
+  - [18:00] Evening walk
+  - [08:00] Morning walk
+
+Conflict check:
+  Conflict at 2026-07-12 08:00: 'Morning walk' (Buddy) overlaps with 'Feed breakfast' (Whiskers)
+
+Marking 'Morning walk' complete...
+  Next occurrence auto-scheduled: 2026-07-13 at 08:00
 ```
 
 ## 🧪 Testing PawPal+
 
-```bash
-# Run the full test suite:
-pytest
+Run the test suite with:
 
-# Run with coverage:
-pytest --cov
+```bash
+python -m pytest
 ```
+
+The tests cover:
+- **Task completion** — verifies `mark_complete()` correctly updates a task's status
+- **Task addition** — verifies adding a task increases a pet's task count
+- **Sorting correctness** — verifies tasks are returned in chronological order regardless of the order they were added
+- **Recurrence logic** — verifies that completing a daily task automatically schedules the next occurrence for the following day
+- **Conflict detection** — verifies the Scheduler correctly flags two tasks scheduled at the same date and time
 
 Sample test output:
 
 ```
-# Paste your pytest output here
+============= test session starts ==============
+platform darwin -- Python 3.13.13, pytest-9.0.3, pluggy-1.6.0
+rootdir: /Users/rainamariyam/Desktop/pawpal-repo
+plugins: anyio-4.13.0
+collected 5 items                              
+
+tests/test_pawpal.py .....               [100%]
+
+============== 5 passed in 0.03s ===============
 ```
+
+**Confidence Level:** ⭐⭐⭐⭐☆ (4/5) — all core behaviors are verified, but edge cases like overlapping durations (rather than exact time matches) or malformed time strings aren't yet covered.
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
-
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sort_by_time()` | Sorts all tasks across every pet chronologically by date and time |
+| Filtering | `Scheduler.filter_tasks(status, pet_name)` | Filters by completion status and/or a specific pet |
+| Conflict handling | `Scheduler.detect_conflicts()` | Flags any two tasks (across any pets) scheduled at the exact same date and time |
+| Recurring tasks | `Task.mark_complete()` | Automatically generates the next occurrence (using `timedelta`) when a daily/weekly task is completed |
 
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
-
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
-
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
+1. Open the app with `streamlit run app.py`.
+2. In the sidebar, add a pet by entering its name and species.
+3. Still in the sidebar, add a task for that pet — description, due time, and frequency (once/daily/weekly).
+4. The main area shows a live, sorted schedule table across all pets.
+5. If two tasks land on the same date and time, a warning banner appears at the top flagging the conflict.
+6. Use the filter dropdowns to view tasks by pet or by completion status.
+7. Select a task and click "Mark Complete" — if it's recurring, the next occurrence is automatically scheduled and shown.
